@@ -3,7 +3,7 @@ name: TeslaSphere
 description: "Tesla via TeslaSphere"
 strategy: polling
 polling_url: https://teslasphere.app/api/trmnl/vehicle{% if vin %}?vin={{ vin }}{% endif %}
-polling_headers: authorization=Bearer {{ oauth_access_token }}
+polling_headers: Authorization=Bearer {{ oauth_access_token }}&X-Trmnl-OAuth-Token={{ oauth_access_token }}
 polling_verb: get
 refresh_interval: 15
 framework_version: latest
