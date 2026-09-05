@@ -1,29 +1,14 @@
 {% render 'shared' %}
+<script data-trmnl-src="https://trmnl.com/js/highcharts/12.3.0/highcharts.js"></script>
+<script data-trmnl-src="https://trmnl.com/js/highcharts/12.3.0/highcharts-more.js"></script>
+<script data-trmnl-src="https://trmnl.com/js/highcharts/12.3.0/pattern-fill.js"></script>
 
-<div class="layout layout--row gap--medium flex--center">
-  <div class="flex flex--col flex--center" style="min-width: 42%;">
-    <div class="progress-circle" style="--value: {{ battery_level }}; width: 220px; height: 220px; position: relative;">
-      <svg viewBox="0 0 120 120" width="220" height="220" aria-hidden="true">
-        <circle cx="60" cy="60" r="48" fill="none" stroke="#d0d0d0" stroke-width="10" />
-        <circle cx="60" cy="60" r="48" fill="none" stroke="#000" stroke-width="10"
-          stroke-linecap="butt"
-          stroke-dasharray="{{ battery_level | times: 3.01593 }} 301.593"
-          transform="rotate(-90 60 60)" />
-        {% assign limit_angle = charge_limit | times: 3.6 | minus: 90 %}
-        <line x1="60" y1="60"
-          x2="{{ 60 | plus: 52 }}" y2="60"
-          stroke="#000" stroke-width="2"
-          transform="rotate({{ charge_limit | times: 3.6 }} 60 60)"
-          stroke-dasharray="8 40" />
-      </svg>
-      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-        <span class="value value--xxlarge value--tnums">{{ battery_level }}%</span>
-        <span class="label">Battery Level</span>
-      </div>
-    </div>
+<div class="layout layout--row gap--large flex--center" id="teslasphere-root" data-battery-level="{{ battery_level }}" data-charge-limit="{{ charge_limit }}">
+  <div class="flex flex--col flex--center" style="width:40%;min-width:240px;">
+    <div id="battery_gauge" style="width:100%;height:280px;"></div>
   </div>
 
-  <div class="columns w--full">
+  <div class="columns w--full" style="flex:1;">
     <div class="column">
       <div class="item">
         <div class="content">
@@ -72,3 +57,104 @@
   <span class="title">Tesla</span>
   <span class="instance">{{ instance_label }}</span>
 </div>
+
+<script>
+(function () {
+  function buildGauge() {
+    var root = document.getElementById('teslasphere-root');
+    if (!root || !window.Highcharts) return;
+    var level = parseFloat(root.getAttribute('data-battery-level')) || 0;
+    var limit = parseFloat(root.getAttribute('data-charge-limit')) || 80;
+    var el = 'battery_gauge';
+    var chartEl = document.getElementById(el);
+    if (!chartEl) return;
+    if (chartEl._teslaChart) {
+      try { chartEl._teslaChart.destroy(); } catch (e) {}
+    }
+
+    var px = function (v) {
+      return (window.TRMNLPaint && TRMNLPaint.px) ? TRMNLPaint.px(v, { el: el }) : v;
+    };
+    var seriesColor = (window.TRMNLCharts && TRMNLCharts.series)
+      ? TRMNLCharts.series(0, 2, { el: el }) : '#111';
+    var trackColor = (window.TRMNLCharts && TRMNLCharts.series)
+      ? TRMNLCharts.series(1, 2, { el: el }) : '#c8c8c8';
+    var labelStyle = (window.TRMNLCharts && TRMNLCharts.textStyle)
+      ? TRMNLCharts.textStyle('chart-label', { el: el })
+      : { fontSize: '11px', color: '#111', fontWeight: '500' };
+    var valueStyle = (window.TRMNLCharts && TRMNLCharts.textStyle)
+      ? TRMNLCharts.textStyle('value', { el: el })
+      : { fontSize: '42px', fontWeight: '600', color: '#111' };
+    var titleStyle = (window.TRMNLCharts && TRMNLCharts.textStyle)
+      ? TRMNLCharts.textStyle('label', { el: el })
+      : { fontSize: '13px', color: '#333' };
+
+    var opts = {
+      chart: { type: 'gauge', backgroundColor: 'transparent', height: '100%' },
+      title: { text: 'Battery Level', align: 'center', verticalAlign: 'bottom', y: 8, style: titleStyle },
+      pane: {
+        startAngle: -120,
+        endAngle: 120,
+        background: [{ backgroundColor: 'transparent', borderWidth: 0 }]
+      },
+      yAxis: {
+        min: 0,
+        max: 100,
+        tickPositions: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+        minorTickInterval: null,
+        tickLength: px(14),
+        tickWidth: 1,
+        tickColor: '#111',
+        tickPosition: 'inside',
+        lineWidth: 0,
+        labels: { distance: px(20), style: labelStyle },
+        plotBands: [
+          { from: 0, to: Math.max(level, 0.01), color: seriesColor, innerRadius: '75%', outerRadius: '100%' },
+          { from: Math.min(level + 0.01, 100), to: 100, color: trackColor, innerRadius: '75%', outerRadius: '100%' }
+        ],
+        plotLines: [{ value: limit, width: 2, color: '#000', zIndex: 6 }]
+      },
+      plotOptions: {
+        gauge: {
+          animation: false,
+          dial: { backgroundColor: 'transparent', baseWidth: 0, rearLength: 0, radius: 0 },
+          pivot: { backgroundColor: 'transparent', radius: 0 }
+        }
+      },
+      series: [{
+        name: 'Battery',
+        data: [level],
+        dataLabels: {
+          format: '{y}%',
+          borderWidth: 0,
+          y: 18,
+          style: valueStyle
+        }
+      }],
+      credits: { enabled: false },
+      tooltip: { enabled: false },
+      legend: { enabled: false }
+    };
+
+    if (window.TRMNLCharts && TRMNLCharts.options && TRMNLCharts.merge) {
+      opts = TRMNLCharts.merge(TRMNLCharts.options({ el: el }), opts);
+    }
+
+    chartEl._teslaChart = Highcharts.chart(el, opts);
+  }
+
+  function whenReady(cb) {
+    var n = 0;
+    (function tick() {
+      if (window.Highcharts) return cb();
+      if (++n > 100) return;
+      setTimeout(tick, 40);
+    })();
+  }
+
+  whenReady(buildGauge);
+  if (window.TRMNLCharts && typeof TRMNLCharts.onChange === 'function') {
+    TRMNLCharts.onChange(buildGauge);
+  }
+})();
+</script>
