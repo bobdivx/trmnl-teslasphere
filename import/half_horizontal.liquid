@@ -1,107 +1,13 @@
-{% comment %}TeslaSphere — shared assigns from Tessie /state{% endcomment %}
-{% assign cs = charge_state %}
-{% assign vs = vehicle_state %}
-{% assign gs = gui_settings %}
-
-{% assign battery_level = cs.battery_level | default: cs.usable_battery_level | default: 0 | plus: 0 %}
-{% assign charge_limit = cs.charge_limit_soc | default: 80 | plus: 0 %}
-{% assign battery_range_raw = cs.battery_range | default: 0 | plus: 0 %}
-{% assign energy_added = cs.charge_energy_added | default: 0 | plus: 0 %}
-{% assign minutes_to_limit = cs.minutes_to_full_charge | default: 0 | plus: 0 %}
-{% assign charging_state = cs.charging_state | default: "Unknown" %}
-{% assign charger_power = cs.charger_power | default: 0 | plus: 0 %}
-{% assign odometer_raw = vs.odometer | default: 0 | plus: 0 %}
-{% assign vehicle_name = display_name | default: vs.vehicle_name | default: "Tesla" %}
-{% assign ts_ms = cs.timestamp | default: vs.timestamp | default: 0 %}
-
-{% assign distance_units = gs.gui_distance_units | default: "mi/hr" %}
-{% if distance_units contains "km" %}
- {% assign range_unit = "km" %}
- {% assign odo_unit = "km" %}
- {% assign range_value = battery_range_raw | times: 1.60934 | round %}
- {% assign odo_for_compact = odometer_raw | times: 1.60934 %}
-{% else %}
- {% assign range_unit = "mi" %}
- {% assign odo_unit = "mi" %}
- {% assign range_value = battery_range_raw | round %}
- {% assign odo_for_compact = odometer_raw %}
-{% endif %}
-
-{% assign energy_display = energy_added | round: 1 | append: " kWh" %}
-{% assign power_display = charger_power | append: " kW" %}
-
-{% if minutes_to_limit >= 60 %}
- {% assign hrs = minutes_to_limit | divided_by: 60 %}
- {% assign mins = minutes_to_limit | modulo: 60 %}
- {% if mins > 0 %}
- {% assign time_display = hrs | append: "h " | append: mins | append: "m" %}
- {% else %}
- {% assign time_display = hrs | append: "h" %}
- {% endif %}
-{% else %}
- {% assign time_display = minutes_to_limit | append: "m" %}
-{% endif %}
-
-{% assign odo_thousands = odo_for_compact | divided_by: 1000.0 %}
-{% assign odo_display = odo_thousands | round: 1 | append: "k" %}
-
-{% assign ts_sec = ts_ms | divided_by: 1000 %}
-{% if ts_sec > 0 %}
- {% assign updated_at = ts_sec | date: "%Y/%m/%d %H:%M" %}
-{% else %}
- {% assign updated_at = "" %}
-{% endif %}
-
-{% if updated_at != "" %}
- {% assign instance_label = vehicle_name | append: " (" | append: updated_at | append: ")" %}
-{% else %}
- {% assign instance_label = vehicle_name %}
-{% endif %}
-
-{% assign time_to_limit_label = "Time to " | append: charge_limit | append: "% Limit" %}
-{% assign range_label = "Range (" | append: range_unit | append: ")" %}
-{% assign odo_label = "Odometer (" | append: odo_unit | append: ")" %}
-
-<style>
-  .teslasphere { color: #000; background: #fff; font-family: inherit; }
-  .teslasphere .small-main { flex: 1; min-height: 0; }
-  .teslasphere .battery-summary { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px dotted #000; padding-bottom: 8px; }
-  .teslasphere .battery-summary .battery-value { font-size: 39px; line-height: 1; font-weight: 500; }
-  .teslasphere .battery-summary .battery-label { font-size: 17px; font-weight: 600; }
-  .teslasphere .battery-summary .limit { font-size: 14px; font-weight: 600; }
-  .teslasphere .battery-track { height: 9px; border: 1px solid #000; margin-top: 8px; }
-  .teslasphere .battery-fill { height: 100%; background: #000; }
-  .teslasphere .compact-grid { display: grid; grid-template-columns: repeat(2, 1fr); flex: 1; min-height: 0; }
-  .teslasphere .compact-metric { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: 5px 12px; }
-  .teslasphere .compact-metric:nth-child(even) { border-left: 1px dotted #000; }
-  .teslasphere .compact-metric:nth-child(n+3) { border-top: 1px dotted #000; }
-  .teslasphere .compact-value { display: block; font-size: 25px; line-height: 1.05; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .teslasphere .compact-label { display: block; font-size: 14px; line-height: 1.15; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .teslasphere .status-value { text-transform: capitalize; }
-  .teslasphere .title_bar { color: #000; background: #fff; border: 1px dotted #000; min-height: 30px; display: flex; align-items: center; gap: 7px; padding: 2px 8px; }
-  .teslasphere .title_bar .image { width: 21px; height: 21px; }
-  .teslasphere .title_bar .title { font-weight: 700; font-size: 15px; }
-  .teslasphere .title_bar .instance { margin-left: auto; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-</style>
-
-<div class="view teslasphere view--half_horizontal">
-  <div class="layout layout--col gap--small small-main">
-    <div class="battery-summary">
-      <div><span class="battery-value value--tnums">{{ battery_level }}%</span> <span class="battery-label">Battery Level</span></div>
-      <span class="limit">Limit {{ charge_limit }}%</span>
-    </div>
-    <div class="battery-track" aria-label="Battery level"><div class="battery-fill" style="width: {{ battery_level }}%;"></div></div>
-    <div class="compact-grid">
-      <div class="compact-metric"><span class="compact-value value--tnums">{{ range_value }}</span><span class="compact-label">{{ range_label }}</span></div>
-      <div class="compact-metric"><span class="compact-value status-value" data-clamp="1">{{ charging_state }}</span><span class="compact-label">Status</span></div>
-      <div class="compact-metric"><span class="compact-value value--tnums">{{ energy_display }}</span><span class="compact-label">Energy Added</span></div>
-      <div class="compact-metric"><span class="compact-value value--tnums">{{ power_display }}</span><span class="compact-label">Charging Power</span></div>
-      <div class="compact-metric"><span class="compact-value value--tnums">{{ time_display }}</span><span class="compact-label">{{ time_to_limit_label }}</span></div>
-      <div class="compact-metric"><span class="compact-value value--tnums">{{ odo_display }}</span><span class="compact-label">{{ odo_label }}</span></div>
-    </div>
-  </div>
-  <div class="title_bar">
-    <svg class="image" viewBox="0 0 32 24" role="img" aria-label="Tesla T" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M3 5.2C7.2 2.4 11.1 1.5 16 1.5s8.8.9 13 3.7c-.4.8-1 1.4-1.7 1.9-3-1.2-6.1-1.9-9.6-2.1v13.9l-1.7 3.6-1.7-3.6V5c-3.5.2-6.6.9-9.6 2.1C4 6.6 3.4 6 3 5.2Z"/></svg>
-    <span class="title">Tesla</span><span class="instance">{{ instance_label }}</span>
-  </div>
-</div>
+{% comment %}TeslaSphere — flattened OAuth vehicle payload{% endcomment %}
+{% assign battery_level = battery_level | default: usable_battery_level | default: 0 | plus: 0 %}
+{% assign charge_limit = charge_limit_soc | default: 80 | plus: 0 %}
+{% assign battery_range_raw = battery_range | default: 0 | plus: 0 %}
+{% assign energy_added = charge_energy_added | default: 0 | plus: 0 %}
+{% assign minutes_to_limit = minutes_to_full_charge | default: time_to_full_charge | default: 0 | plus: 0 %}
+{% assign charging_state = charging_state | default: "Unknown" %}{% assign charger_power = charger_power | default: 0 | plus: 0 %}
+{% assign odometer_raw = odometer | default: 0 | plus: 0 %}{% assign vehicle_name = display_name | default: "Tesla" %}{% assign ts_ms = timestamp | default: 0 %}
+{% assign distance_units = gui_distance_units | default: "mi/hr" %}{% if distance_units contains "km" %}{% assign range_unit = "km" %}{% assign odo_unit = "km" %}{% assign range_value = battery_range_raw | times: 1.60934 | round %}{% assign odo_for_compact = odometer_raw | times: 1.60934 %}{% else %}{% assign range_unit = "mi" %}{% assign odo_unit = "mi" %}{% assign range_value = battery_range_raw | round %}{% assign odo_for_compact = odometer_raw %}{% endif %}
+{% assign energy_display = energy_added | round: 1 | append: " kWh" %}{% assign power_display = charger_power | append: " kW" %}{% if minutes_to_limit >= 60 %}{% assign hrs = minutes_to_limit | divided_by: 60 %}{% assign mins = minutes_to_limit | modulo: 60 %}{% if mins > 0 %}{% assign time_display = hrs | append: "h " | append: mins | append: "m" %}{% else %}{% assign time_display = hrs | append: "h" %}{% endif %}{% else %}{% assign time_display = minutes_to_limit | append: "m" %}{% endif %}
+{% assign odo_thousands = odo_for_compact | divided_by: 1000.0 %}{% assign odo_display = odo_thousands | round: 1 | append: "k" %}{% assign ts_sec = ts_ms | divided_by: 1000 %}{% if ts_sec > 0 %}{% assign updated_at = ts_sec | date: "%Y/%m/%d %H:%M" %}{% else %}{% assign updated_at = "" %}{% endif %}{% if updated_at != "" %}{% assign instance_label = vehicle_name | append: " (" | append: updated_at | append: ")" %}{% else %}{% assign instance_label = vehicle_name %}{% endif %}{% assign time_to_limit_label = "Time to " | append: charge_limit | append: "% Limit" %}{% assign range_label = "Range (" | append: range_unit | append: ")" %}{% assign odo_label = "Odometer (" | append: odo_unit | append: ")" %}
+<style>.teslasphere{color:#000;background:#fff;font-family:inherit}.teslasphere .small-main{flex:1;min-height:0}.teslasphere .battery-summary{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px dotted #000;padding-bottom:8px}.teslasphere .battery-value{font-size:39px;line-height:1;font-weight:500}.teslasphere .battery-label{font-size:17px;font-weight:600}.teslasphere .limit{font-size:14px;font-weight:600}.teslasphere .battery-track{height:9px;border:1px solid #000;margin-top:8px}.teslasphere .battery-fill{height:100%;background:#000}.teslasphere .compact-grid{display:grid;grid-template-columns:repeat(2,1fr);flex:1;min-height:0}.teslasphere .compact-metric{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:5px 12px}.teslasphere .compact-metric:nth-child(even){border-left:1px dotted #000}.teslasphere .compact-metric:nth-child(n+3){border-top:1px dotted #000}.teslasphere .compact-value{display:block;font-size:25px;line-height:1.05;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.teslasphere .compact-label{display:block;font-size:14px;line-height:1.15;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.teslasphere .status-value{text-transform:capitalize}.teslasphere .title_bar{color:#000;background:#fff;border:1px dotted #000;min-height:30px;display:flex;align-items:center;gap:7px;padding:2px 8px}.teslasphere .title_bar .image{width:21px;height:21px}.teslasphere .title_bar .title{font-weight:700;font-size:15px}.teslasphere .title_bar .instance{margin-left:auto;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}</style>
+<div class="view teslasphere view--half_horizontal"><div class="layout layout--col gap--small small-main"><div class="battery-summary"><div><span class="battery-value value--tnums">{{ battery_level }}%</span> <span class="battery-label">Battery Level</span></div><span class="limit">Limit {{ charge_limit }}%</span></div><div class="battery-track" aria-label="Battery level"><div class="battery-fill" style="width: {{ battery_level }}%;"></div></div><div class="compact-grid"><div class="compact-metric"><span class="compact-value value--tnums">{{ range_value }}</span><span class="compact-label">{{ range_label }}</span></div><div class="compact-metric"><span class="compact-value status-value" data-clamp="1">{{ charging_state }}</span><span class="compact-label">Status</span></div><div class="compact-metric"><span class="compact-value value--tnums">{{ energy_display }}</span><span class="compact-label">Energy Added</span></div><div class="compact-metric"><span class="compact-value value--tnums">{{ power_display }}</span><span class="compact-label">Charging Power</span></div><div class="compact-metric"><span class="compact-value value--tnums">{{ time_display }}</span><span class="compact-label">{{ time_to_limit_label }}</span></div><div class="compact-metric"><span class="compact-value value--tnums">{{ odo_display }}</span><span class="compact-label">{{ odo_label }}</span></div></div></div><div class="title_bar"><svg class="image" viewBox="0 0 32 24" role="img" aria-label="Tesla T" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M3 5.2C7.2 2.4 11.1 1.5 16 1.5s8.8.9 13 3.7c-.4.8-1 1.4-1.7 1.9-3-1.2-6.1-1.9-9.6-2.1v13.9l-1.7 3.6-1.7-3.6V5c-3.5.2-6.6.9-9.6 2.1C4 6.6 3.4 6 3 5.2Z"/></svg><span class="title">Tesla</span><span class="instance">{{ instance_label }}</span></div></div>

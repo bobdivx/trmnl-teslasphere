@@ -1,54 +1,35 @@
 # TeslaSphere
 
-TeslaSphere affiche l'état de charge d'une Tesla avec l'API Tessie, dans un écran TRMNL optimisé pour l'e-ink.
+TeslaSphere displays Tesla charging data from your TeslaSphere account in an e-ink-friendly TRMNL plugin. The plugin uses TeslaSphere OAuth Connect, so the vehicle is linked once in TeslaSphere and no vehicle token is entered in TRMNL.
 
-## Installation avec TRMNL (français)
+## Install with TRMNL
 
-1. Téléchargez [`dist/teslasphere-import.zip`](dist/teslasphere-import.zip).
-2. Dans TRMNL, ouvrez **Plugins → Private Plugin → Import new**.
-3. Sélectionnez `teslasphere-import.zip`.
-4. Renseignez le VIN et le token Tessie (créé depuis [my.tessie.com/settings/api](https://my.tessie.com/settings/api)).
+1. Zip the files inside [`import/`](import/) so that `settings.yml` is at the archive root, or use the provided `dist/teslasphere-import.zip` when available.
+2. In TRMNL, open **Plugins → Private Plugin → Import new** and select the ZIP.
+3. Choose **Connect with TeslaSphere**, authorize the requested `vehicle:read` scope, and optionally enter a VIN override. Leaving VIN empty uses your first TeslaSphere vehicle.
 
-L'archive d'import est volontairement plate et contient exactement les cinq fichiers attendus par TRMNL.
+### TeslaSphere server setup
 
-## Installation avec trmnlp (français)
+Configure these environment variables on the TeslaSphere server before using OAuth Connect:
 
-Pour les utilisateurs de l'édition **Developer**, configurez votre clé API utilisateur commençant par `user_`, puis lancez :
+- `TRMNL_OAUTH_CLIENT_ID`
+- `TRMNL_OAUTH_CLIENT_SECRET`
+- `TRMNL_OAUTH_REDIRECT_URIS`
 
-```sh
-TRMNL_API_KEY=user_... trmnlp push --force
-```
+For production OAuth URLs, merge the required OAuth support to `main` in [bobdivx/tesla](https://github.com/bobdivx/tesla) first. This plugin repository does not modify that repository.
 
-Le fichier `.trmnlp.yml` contient les données de prévisualisation locales. Ne commitez jamais un token Tessie réel.
+## Install with trmnlp
 
-## Déploiement GitHub (français)
-
-Ajoutez `TRMNL_API_KEY` comme secret du dépôt GitHub (**Settings → Secrets and variables → Actions**). Le workflow `.github/workflows/trmnl.yml` lance le lint puis déploie automatiquement sur chaque push vers `main`.
-
-## English
-
-TeslaSphere displays Tesla charging data from the Tessie API in an e-ink-friendly TRMNL plugin.
-
-### Install through TRMNL
-
-1. Easiest: use the ZIP already provided in chat, OR zip the contents of the `import/` folder (zip the files inside, not the folder name as root nesting issues — zip must have `settings.yml` at archive root).
-2. Command: `cd import && zip ../dist/teslasphere-import.zip settings.yml full.liquid half_horizontal.liquid half_vertical.liquid quadrant.liquid`
-3. Then TRMNL → Plugins → Private Plugin → Import new
-
-Enter the vehicle VIN and a Tessie token from [my.tessie.com/settings/api](https://my.tessie.com/settings/api).
-
-The import archive is intentionally flat and contains only the five files TRMNL expects.
-
-### Install with trmnlp
-
-For the **Developer edition**, use a user API key beginning with `user_`:
+For the **Developer edition**, configure a user API key beginning with `user_`, then run:
 
 ```sh
 TRMNL_API_KEY=user_... trmnlp push --force
 ```
 
-### Automatic GitHub deployment
+The `.trmnlp.yml` file contains static flattened preview data; OAuth is not needed for local preview.
 
-Add `TRMNL_API_KEY` as a GitHub repository secret. The workflow in `.github/workflows/trmnl.yml` lints the plugin and auto-deploys on pushes to `main`.
+## Automatic GitHub deployment
+
+Add `TRMNL_API_KEY` as a GitHub repository secret. The workflow in `.github/workflows/trmnl.yml` lints the plugin and deploys it on pushes to `main`.
 
 Source and issue tracker: [github.com/bobdivx/trmnl-teslasphere](https://github.com/bobdivx/trmnl-teslasphere).

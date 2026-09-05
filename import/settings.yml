@@ -1,9 +1,9 @@
 ---
 name: TeslaSphere
-description: "Tesla charging via Tessie"
+description: "Tesla via TeslaSphere"
 strategy: polling
-polling_url: https://api.tessie.com/{{ vin }}/state
-polling_headers: content-type=application/json&authorization=Bearer {{ tessie_token }}
+polling_url: https://www.teslasphere.app/api/trmnl/vehicle{% if vin %}?vin={{ vin }}{% endif %}
+polling_headers: authorization=Bearer {{ oauth_access_token }}
 polling_verb: get
 refresh_interval: 15
 framework_version: latest
@@ -11,21 +11,22 @@ no_screen_padding: 'no'
 dark_mode: 'no'
 static_data: ''
 polling_body: ''
-oauth_enabled: 'false'
+oauth_enabled: 'true'
+oauth_authorize_url: https://www.teslasphere.app/api/trmnl/oauth/authorize
+oauth_token_url: https://www.teslasphere.app/api/trmnl/oauth/token
+oauth_scopes: vehicle:read
+oauth_pkce_enabled: 'true'
 custom_fields:
 - keyname: author_bio
   name: About This Plugin
   field_type: author_bio
   category: analytics,travel
-  description: 'TeslaSphere displays Tesla charging data through Tessie. Source: <a class="underline inline" href="https://github.com/bobdivx/trmnl-teslasphere" target="_blank">GitHub</a>.'
+  description: 'Connect your TeslaSphere account. Charge data comes from your already-linked Tesla. Source: <a class="underline inline" href="https://github.com/bobdivx/trmnl-teslasphere" target="_blank">GitHub</a>.'
+  github_url: https://github.com/bobdivx/trmnl-teslasphere
   email_address: Mathieu
 - keyname: vin
-  name: VIN
+  name: VIN (optional)
   field_type: string
-  description: 'VIN of the vehicle to display'
+  description: 'Leave empty to use your first TeslaSphere vehicle. Optional override.'
+  optional: true
   placeholder: 5YJ3E1EA1KF000000
-- keyname: tessie_token
-  name: Tessie API token
-  field_type: password
-  description: 'Create a token at <a class="underline inline" href="https://my.tessie.com/settings/api" target="_blank">my.tessie.com/settings/api</a>'
-  placeholder: tessiesecret_...
