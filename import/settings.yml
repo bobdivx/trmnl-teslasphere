@@ -1,0 +1,31 @@
+---
+name: TeslaSphere
+description: "Tesla charging via Tessie"
+strategy: polling
+polling_url: https://api.tessie.com/{{ vin }}/state
+polling_headers: content-type=application/json&authorization=Bearer {{ tessie_token }}
+polling_verb: get
+refresh_interval: 15
+framework_version: latest
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_body: ''
+oauth_enabled: 'false'
+custom_fields:
+- keyname: author_bio
+  name: About This Plugin
+  field_type: author_bio
+  category: analytics,travel
+  description: 'TeslaSphere displays Tesla charging data through Tessie. Source: <a class="underline inline" href="https://github.com/bobdivx/trmnl-teslasphere" target="_blank">GitHub</a>.'
+  email_address: Mathieu
+- keyname: vin
+  name: VIN
+  field_type: string
+  description: 'VIN of the vehicle to display'
+  placeholder: 5YJ3E1EA1KF000000
+- keyname: tessie_token
+  name: Tessie API token
+  field_type: password
+  description: 'Create a token at <a class="underline inline" href="https://my.tessie.com/settings/api" target="_blank">my.tessie.com/settings/api</a>'
+  placeholder: tessiesecret_...

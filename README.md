@@ -31,10 +31,11 @@ TeslaSphere displays Tesla charging data from the Tessie API in an e-ink-friendl
 
 ### Install through TRMNL
 
-1. Download [`dist/teslasphere-import.zip`](dist/teslasphere-import.zip).
-2. In TRMNL, open **Plugins → Private Plugin → Import new**.
-3. Select `teslasphere-import.zip`.
-4. Enter the vehicle VIN and a Tessie token from [my.tessie.com/settings/api](https://my.tessie.com/settings/api).
+1. Easiest: use the ZIP already provided in chat, OR zip the contents of the `import/` folder (zip the files inside, not the folder name as root nesting issues — zip must have `settings.yml` at archive root).
+2. Command: `cd import && zip ../dist/teslasphere-import.zip settings.yml full.liquid half_horizontal.liquid half_vertical.liquid quadrant.liquid`
+3. Then TRMNL → Plugins → Private Plugin → Import new
+
+Enter the vehicle VIN and a Tessie token from [my.tessie.com/settings/api](https://my.tessie.com/settings/api).
 
 The import archive is intentionally flat and contains only the five files TRMNL expects.
 
