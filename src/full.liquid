@@ -42,6 +42,13 @@
 {% if ts_sec > 0 %}{% assign updated_at = ts_sec | date: "%d/%m %H:%M" %}{% else %}{% assign updated_at = "" %}{% endif %}
 {% if updated_at != "" %}{% assign instance_label = vehicle_name | append: " · " | append: updated_at %}{% else %}{% assign instance_label = vehicle_name %}{% endif %}
 {% assign charge_limit_label = "Limite " | append: charge_limit | append: "%" %}
+{% assign is_fresh = data_fresh %}
+{% if is_fresh == true or is_fresh == "true" %}
+  {% assign freshness_label = "Données live" %}
+{% else %}
+  {% assign freshness_label = "Données en cache" %}
+  {% if updated_at != "" %}{% assign freshness_label = freshness_label | append: " · " | append: updated_at %}{% endif %}
+{% endif %}
 <style>
   .ts-full .hero { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
   .ts-full .hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
@@ -69,6 +76,7 @@
       <div class="soc-meta">
         <span class="label">Batterie</span>
         <span class="status" data-clamp="1">{{ charging_state }}{% if vehicle_state != "" %} · {{ vehicle_state }}{% endif %}</span>
+        <span class="label" style="margin-top:8px; opacity:0.85;">{{ freshness_label }}</span>
       </div>
     </div>
     <div>
