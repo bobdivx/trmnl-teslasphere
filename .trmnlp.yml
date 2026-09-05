@@ -1,0 +1,34 @@
+---
+watch:
+  - .trmnlp.yml
+  - src
+
+custom_fields:
+  vin: '5YJTESTVIN0000001'
+  tessie_token: 'demo-token'
+
+variables:
+  trmnl:
+    plugin_settings:
+      instance_name: 'Winifred'
+    user:
+      time_zone: Paris
+      time_zone_iana: Europe/Paris
+      utc_offset: 7200
+  display_name: Winifred
+  charge_state:
+    battery_level: 45
+    usable_battery_level: 45
+    battery_range: 137.2
+    charge_energy_added: 0
+    minutes_to_full_charge: 0
+    charge_limit_soc: 80
+    charging_state: Disconnected
+    charger_power: 0
+    timestamp: 1747952940000
+  vehicle_state:
+    odometer: 85200
+    vehicle_name: Winifred
+    timestamp: 1747952940000
+  gui_settings:
+    gui_distance_units: mi/hr

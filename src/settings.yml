@@ -1,0 +1,33 @@
+---
+strategy: polling
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: latest
+serverless_language: node
+polling_url: https://api.tessie.com/{{ vin }}/state
+polling_headers: content-type=application/json&authorization=Bearer {{ tessie_token }}
+polling_body: ''
+oauth_enabled: 'false'
+custom_fields:
+- keyname: author_bio
+  name: About This Plugin
+  field_type: author_bio
+  category: analytics,travel
+  description: TeslaSphere shows Tesla charging information via Tessie — battery level, range, charge status, and power. Recreated from the community Tessie recipe.
+  github_url: https://github.com/bobdivx/trmnl-teslasphere
+  email_address: Mathieu
+- keyname: vin
+  name: VIN
+  field_type: string
+  description: VIN of the vehicle to display
+  placeholder: 5YJ3E1EA1KF000000
+- keyname: tessie_token
+  name: Token
+  field_type: password
+  description: Tessie API token, generate at <a class="underline inline" href="https://my.tessie.com/settings/api" target="_blank">https://my.tessie.com/settings/api</a>
+  placeholder: tessiesecret_...
+name: TeslaSphere
+description: Show Tesla charging information via Tessie
+refresh_interval: 15
