@@ -1,0 +1,16 @@
+{% render 'shared' %}
+
+<div class="layout layout--col gap--small flex--center">
+  <span class="value value--xxxlarge value--tnums">{{ battery_level }}%</span>
+  <span class="label">Battery</span>
+  <div class="divider w--full"></div>
+  <span class="value value--xlarge value--tnums">{{ range_value }} {{ range_unit }}</span>
+  <span class="label">Range</span>
+  <span class="value value--large clamp clamp--1 mt--small">{{ charging_state }}</span>
+  <span class="label">Status</span>
+</div>
+
+<div class="title_bar">
+  <span class="title">Tesla</span>
+  <span class="instance">{{ vehicle_name }}</span>
+</div>

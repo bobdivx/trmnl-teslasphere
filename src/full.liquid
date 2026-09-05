@@ -1,0 +1,74 @@
+{% render 'shared' %}
+
+<div class="layout layout--row gap--medium flex--center">
+  <div class="flex flex--col flex--center" style="min-width: 42%;">
+    <div class="progress-circle" style="--value: {{ battery_level }}; width: 220px; height: 220px; position: relative;">
+      <svg viewBox="0 0 120 120" width="220" height="220" aria-hidden="true">
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#d0d0d0" stroke-width="10" />
+        <circle cx="60" cy="60" r="48" fill="none" stroke="#000" stroke-width="10"
+          stroke-linecap="butt"
+          stroke-dasharray="{{ battery_level | times: 3.01593 }} 301.593"
+          transform="rotate(-90 60 60)" />
+        {% assign limit_angle = charge_limit | times: 3.6 | minus: 90 %}
+        <line x1="60" y1="60"
+          x2="{{ 60 | plus: 52 }}" y2="60"
+          stroke="#000" stroke-width="2"
+          transform="rotate({{ charge_limit | times: 3.6 }} 60 60)"
+          stroke-dasharray="8 40" />
+      </svg>
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <span class="value value--xxlarge value--tnums">{{ battery_level }}%</span>
+        <span class="label">Battery Level</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="columns w--full">
+    <div class="column">
+      <div class="item">
+        <div class="content">
+          <span class="value value--xxlarge value--tnums">{{ range_value }}</span>
+          <span class="label">{{ range_label }}</span>
+        </div>
+      </div>
+      <div class="item mt--large">
+        <div class="content">
+          <span class="value value--xxlarge value--tnums">{{ energy_display }}</span>
+          <span class="label">Energy Added</span>
+        </div>
+      </div>
+      <div class="item mt--large">
+        <div class="content">
+          <span class="value value--xxlarge value--tnums">{{ time_display }}</span>
+          <span class="label">{{ time_to_limit_label }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="item">
+        <div class="content">
+          <span class="value value--xxlarge clamp clamp--1">{{ charging_state }}</span>
+          <span class="label">Status</span>
+        </div>
+      </div>
+      <div class="item mt--large">
+        <div class="content">
+          <span class="value value--xxlarge value--tnums">{{ power_display }}</span>
+          <span class="label">Charging Power</span>
+        </div>
+      </div>
+      <div class="item mt--large">
+        <div class="content">
+          <span class="value value--xxlarge value--tnums">{{ odo_display }}</span>
+          <span class="label">{{ odo_label }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0iYmxhY2siPjxwYXRoIGQ9Ik04IDE0aDQ4djZIMzZ2MzRoLThWMjBIOHoiLz48cGF0aCBkPSJNMTIgMTBjOC00IDMyLTQgNDAgMHY0Yy04LTMtMzItMy00MCAweiIvPjwvc3ZnPg==" alt="Tesla" />
+  <span class="title">Tesla</span>
+  <span class="instance">{{ instance_label }}</span>
+</div>

@@ -1,0 +1,33 @@
+{% render 'shared' %}
+
+<div class="layout layout--col gap--medium flex--center">
+  <div class="flex flex--col flex--center">
+    <span class="value value--xxxlarge value--tnums">{{ battery_level }}%</span>
+    <span class="label">Battery Level</span>
+  </div>
+  <div class="divider w--full"></div>
+  <div class="grid grid--cols-2 w--full">
+    <div class="item"><div class="content">
+      <span class="value value--xlarge value--tnums">{{ range_value }}</span>
+      <span class="label">{{ range_label }}</span>
+    </div></div>
+    <div class="item"><div class="content">
+      <span class="value value--xlarge clamp clamp--1">{{ charging_state }}</span>
+      <span class="label">Status</span>
+    </div></div>
+    <div class="item"><div class="content">
+      <span class="value value--xlarge value--tnums">{{ power_display }}</span>
+      <span class="label">Charging Power</span>
+    </div></div>
+    <div class="item"><div class="content">
+      <span class="value value--xlarge value--tnums">{{ energy_display }}</span>
+      <span class="label">Energy Added</span>
+    </div></div>
+  </div>
+</div>
+
+<div class="title_bar">
+  <img class="image" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0iYmxhY2siPjxwYXRoIGQ9Ik04IDE0aDQ4djZIMzZ2MzRoLThWMjBIOHoiLz48cGF0aCBkPSJNMTIgMTBjOC00IDMyLTQgNDAgMHY0Yy04LTMtMzItMy00MCAweiIvPjwvc3ZnPg==" alt="Tesla" />
+  <span class="title">Tesla</span>
+  <span class="instance">{{ vehicle_name }}</span>
+</div>
