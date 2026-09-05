@@ -1,6 +1,11 @@
 # Changelog
 
-## 2026-09-05
+## Unreleased
 
-- Reworked TeslaSphere layouts around an adaptive TeslaSphere charging gauge, compact e-ink metrics, and self-contained Liquid views.
-- Added a flat TRMNL import archive, lint/deploy workflow, and OAuth Connect installation documentation.
+- Redesign e-ink: hero SOC + barre de progression fiable (plus de jauge Highcharts)
+- Identité TeslaSphere (pas un clone Tessie), labels FR
+- Correction du temps restant (Fleet `time_to_full_charge` en heures)
+
+## 0.2.0
+
+- OAuth TeslaSphere + polling vehicle API
