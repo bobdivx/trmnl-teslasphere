@@ -16,30 +16,30 @@
 
 {% assign distance_units = gs.gui_distance_units | default: "mi/hr" %}
 {% if distance_units contains "km" %}
-  {% assign range_unit = "km" %}
-  {% assign odo_unit = "km" %}
-  {% assign range_value = battery_range_raw | times: 1.60934 | round %}
-  {% assign odo_for_compact = odometer_raw | times: 1.60934 %}
+ {% assign range_unit = "km" %}
+ {% assign odo_unit = "km" %}
+ {% assign range_value = battery_range_raw | times: 1.60934 | round %}
+ {% assign odo_for_compact = odometer_raw | times: 1.60934 %}
 {% else %}
-  {% assign range_unit = "mi" %}
-  {% assign odo_unit = "mi" %}
-  {% assign range_value = battery_range_raw | round %}
-  {% assign odo_for_compact = odometer_raw %}
+ {% assign range_unit = "mi" %}
+ {% assign odo_unit = "mi" %}
+ {% assign range_value = battery_range_raw | round %}
+ {% assign odo_for_compact = odometer_raw %}
 {% endif %}
 
 {% assign energy_display = energy_added | round: 1 | append: " kWh" %}
 {% assign power_display = charger_power | append: " kW" %}
 
 {% if minutes_to_limit >= 60 %}
-  {% assign hrs = minutes_to_limit | divided_by: 60 %}
-  {% assign mins = minutes_to_limit | modulo: 60 %}
-  {% if mins > 0 %}
-    {% assign time_display = hrs | append: "h " | append: mins | append: "m" %}
-  {% else %}
-    {% assign time_display = hrs | append: "h" %}
-  {% endif %}
+ {% assign hrs = minutes_to_limit | divided_by: 60 %}
+ {% assign mins = minutes_to_limit | modulo: 60 %}
+ {% if mins > 0 %}
+ {% assign time_display = hrs | append: "h " | append: mins | append: "m" %}
+ {% else %}
+ {% assign time_display = hrs | append: "h" %}
+ {% endif %}
 {% else %}
-  {% assign time_display = minutes_to_limit | append: "m" %}
+ {% assign time_display = minutes_to_limit | append: "m" %}
 {% endif %}
 
 {% assign odo_thousands = odo_for_compact | divided_by: 1000.0 %}
@@ -47,15 +47,15 @@
 
 {% assign ts_sec = ts_ms | divided_by: 1000 %}
 {% if ts_sec > 0 %}
-  {% assign updated_at = ts_sec | date: "%Y/%m/%d %H:%M" %}
+ {% assign updated_at = ts_sec | date: "%Y/%m/%d %H:%M" %}
 {% else %}
-  {% assign updated_at = "" %}
+ {% assign updated_at = "" %}
 {% endif %}
 
 {% if updated_at != "" %}
-  {% assign instance_label = vehicle_name | append: " (" | append: updated_at | append: ")" %}
+ {% assign instance_label = vehicle_name | append: " (" | append: updated_at | append: ")" %}
 {% else %}
-  {% assign instance_label = vehicle_name %}
+ {% assign instance_label = vehicle_name %}
 {% endif %}
 
 {% assign time_to_limit_label = "Time to " | append: charge_limit | append: "% Limit" %}
