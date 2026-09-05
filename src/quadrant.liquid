@@ -1,32 +1,71 @@
-{% comment %}TeslaSphere quadrant — compact hero{% endcomment %}
+{% comment %}TeslaSphere — framework-first, Chef-clean{% endcomment %}
 {% assign battery_level = battery_level | default: usable_battery_level | default: 0 | plus: 0 %}
 {% if battery_level > 100 %}{% assign battery_level = 100 %}{% endif %}
 {% if battery_level < 0 %}{% assign battery_level = 0 %}{% endif %}
 {% assign charge_limit = charge_limit_soc | default: 80 | plus: 0 %}
 {% assign battery_range_raw = battery_range | default: 0 | plus: 0 %}
+{% assign energy_added = charge_energy_added | default: 0 | plus: 0 %}
+{% assign hours_to_limit = minutes_to_full_charge | default: time_to_full_charge | default: 0 | plus: 0 %}
 {% assign charging_state = charging_state | default: "Inconnu" %}
+{% assign charger_power = charger_power | default: 0 | plus: 0 %}
+{% assign odometer_raw = odometer | default: 0 | plus: 0 %}
 {% assign vehicle_name = display_name | default: "Tesla" %}
+{% assign vehicle_state = state | default: "" %}
+{% assign ts_ms = last_updated_at | default: timestamp | default: 0 | plus: 0 %}
 {% assign distance_units = gui_distance_units | default: "km/hr" %}
-{% if distance_units contains "mi" %}{% assign range_unit = "mi" %}{% assign range_value = battery_range_raw | round %}{% else %}{% assign range_unit = "km" %}{% assign range_value = battery_range_raw | times: 1.60934 | round %}{% endif %}
-<style>
-  .ts-q .stack { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; justify-content: center; }
-  .ts-q .soc { font-size: 52px; line-height: 0.9; font-weight: 600; }
-  .ts-q .track { height: 10px; border: 2px solid #000; }
-  .ts-q .fill { height: 100%; background: #000; }
-  .ts-q .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
-  .ts-q .status { text-transform: capitalize; max-width: 55%; text-align: right; }
-</style>
-<div class="view view--quadrant ts-q">
-  <div class="layout layout--col gap--none stack">
-    <div><span class="soc value--tnums">{{ battery_level }}</span><span style="font-size:22px;font-weight:600;">%</span></div>
-    <div class="track"><div class="fill" style="width: {{ battery_level }}%;"></div></div>
-    <div class="meta">
-      <span>{{ range_value }} {{ range_unit }} · lim {{ charge_limit }}%</span>
-      <span class="status" data-clamp="1">{{ charging_state }}</span>
+{% if distance_units contains "mi" %}
+  {% assign range_unit = "mi" %}
+  {% assign odo_unit = "mi" %}
+  {% assign range_value = battery_range_raw | round %}
+  {% assign odo_for_compact = odometer_raw %}
+{% else %}
+  {% assign range_unit = "km" %}
+  {% assign odo_unit = "km" %}
+  {% assign range_value = battery_range_raw | times: 1.60934 | round %}
+  {% assign odo_for_compact = odometer_raw | times: 1.60934 %}
+{% endif %}
+{% assign energy_display = energy_added | round: 1 | append: " kWh" %}
+{% assign power_display = charger_power | round: 1 | append: " kW" %}
+{% assign mins_total = hours_to_limit | times: 60 | round %}
+{% if mins_total >= 60 %}
+  {% assign hrs = mins_total | divided_by: 60 %}
+  {% assign mins = mins_total | modulo: 60 %}
+  {% if mins > 0 %}{% assign time_display = hrs | append: "h " | append: mins | append: "min" %}{% else %}{% assign time_display = hrs | append: "h" %}{% endif %}
+{% elsif mins_total > 0 %}
+  {% assign time_display = mins_total | append: " min" %}
+{% else %}
+  {% assign time_display = "—" %}
+{% endif %}
+{% assign odo_thousands = odo_for_compact | divided_by: 1000.0 %}
+{% assign odo_display = odo_thousands | round: 1 | append: "k " | append: odo_unit %}
+{% if ts_ms > 1000000000000 %}{% assign ts_sec = ts_ms | divided_by: 1000 %}{% else %}{% assign ts_sec = ts_ms %}{% endif %}
+{% if ts_sec > 0 %}{% assign updated_at = ts_sec | date: "%d/%m %H:%M" %}{% else %}{% assign updated_at = "" %}{% endif %}
+{% if updated_at != "" %}{% assign instance_label = vehicle_name | append: " · " | append: updated_at %}{% else %}{% assign instance_label = vehicle_name %}{% endif %}
+{% assign charge_limit_label = "Limite " | append: charge_limit | append: "%" %}
+{% assign is_fresh = data_fresh %}
+{% if is_fresh == true or is_fresh == "true" %}
+  {% assign freshness_label = "Données live" %}
+{% else %}
+  {% assign freshness_label = "Données en cache" %}
+  {% if updated_at != "" %}{% assign freshness_label = freshness_label | append: " · " | append: updated_at %}{% endif %}
+{% endif %}
+
+<div class="layout layout--col gap--small flex--center">
+  <div class="flex flex--row flex--cross-end gap--xsmall">
+    <span class="value value--large value--tnums">{{ battery_level }}</span>
+    <span class="label text--gray-40">%</span>
+  </div>
+  <div class="progress-bar progress-bar--xsmall w--full">
+    <div class="track">
+      <div class="fill" style="width: {{ battery_level }}%"></div>
     </div>
   </div>
-  <div class="title_bar">
-    <span class="title">TeslaSphere</span>
-    <span class="instance">{{ vehicle_name }}</span>
+  <div class="flex flex--row flex--between gap--small">
+    <span class="label label--xsmall" data-clamp="1">{{ range_value }} {{ range_unit }} · lim {{ charge_limit }}%</span>
+    <span class="label label--xsmall text--right text--gray-40" data-clamp="1">{{ charging_state }}</span>
   </div>
+</div>
+<div class="title_bar">
+  <span class="title">TeslaSphere</span>
+  <span class="instance">{{ vehicle_name }}</span>
 </div>

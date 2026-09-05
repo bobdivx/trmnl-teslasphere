@@ -1,4 +1,4 @@
-{% comment %}TeslaSphere half horizontal{% endcomment %}
+{% comment %}TeslaSphere — framework-first, Chef-clean{% endcomment %}
 {% assign battery_level = battery_level | default: usable_battery_level | default: 0 | plus: 0 %}
 {% if battery_level > 100 %}{% assign battery_level = 100 %}{% endif %}
 {% if battery_level < 0 %}{% assign battery_level = 0 %}{% endif %}
@@ -8,49 +8,81 @@
 {% assign hours_to_limit = minutes_to_full_charge | default: time_to_full_charge | default: 0 | plus: 0 %}
 {% assign charging_state = charging_state | default: "Inconnu" %}
 {% assign charger_power = charger_power | default: 0 | plus: 0 %}
+{% assign odometer_raw = odometer | default: 0 | plus: 0 %}
 {% assign vehicle_name = display_name | default: "Tesla" %}
+{% assign vehicle_state = state | default: "" %}
 {% assign ts_ms = last_updated_at | default: timestamp | default: 0 | plus: 0 %}
 {% assign distance_units = gui_distance_units | default: "km/hr" %}
-{% if distance_units contains "mi" %}{% assign range_unit = "mi" %}{% assign range_value = battery_range_raw | round %}{% else %}{% assign range_unit = "km" %}{% assign range_value = battery_range_raw | times: 1.60934 | round %}{% endif %}
+{% if distance_units contains "mi" %}
+  {% assign range_unit = "mi" %}
+  {% assign odo_unit = "mi" %}
+  {% assign range_value = battery_range_raw | round %}
+  {% assign odo_for_compact = odometer_raw %}
+{% else %}
+  {% assign range_unit = "km" %}
+  {% assign odo_unit = "km" %}
+  {% assign range_value = battery_range_raw | times: 1.60934 | round %}
+  {% assign odo_for_compact = odometer_raw | times: 1.60934 %}
+{% endif %}
+{% assign energy_display = energy_added | round: 1 | append: " kWh" %}
 {% assign power_display = charger_power | round: 1 | append: " kW" %}
 {% assign mins_total = hours_to_limit | times: 60 | round %}
-{% if mins_total >= 60 %}{% assign hrs = mins_total | divided_by: 60 %}{% assign mins = mins_total | modulo: 60 %}{% if mins > 0 %}{% assign time_display = hrs | append: "h " | append: mins | append: "min" %}{% else %}{% assign time_display = hrs | append: "h" %}{% endif %}{% elsif mins_total > 0 %}{% assign time_display = mins_total | append: " min" %}{% else %}{% assign time_display = "—" %}{% endif %}
+{% if mins_total >= 60 %}
+  {% assign hrs = mins_total | divided_by: 60 %}
+  {% assign mins = mins_total | modulo: 60 %}
+  {% if mins > 0 %}{% assign time_display = hrs | append: "h " | append: mins | append: "min" %}{% else %}{% assign time_display = hrs | append: "h" %}{% endif %}
+{% elsif mins_total > 0 %}
+  {% assign time_display = mins_total | append: " min" %}
+{% else %}
+  {% assign time_display = "—" %}
+{% endif %}
+{% assign odo_thousands = odo_for_compact | divided_by: 1000.0 %}
+{% assign odo_display = odo_thousands | round: 1 | append: "k " | append: odo_unit %}
 {% if ts_ms > 1000000000000 %}{% assign ts_sec = ts_ms | divided_by: 1000 %}{% else %}{% assign ts_sec = ts_ms %}{% endif %}
 {% if ts_sec > 0 %}{% assign updated_at = ts_sec | date: "%d/%m %H:%M" %}{% else %}{% assign updated_at = "" %}{% endif %}
 {% if updated_at != "" %}{% assign instance_label = vehicle_name | append: " · " | append: updated_at %}{% else %}{% assign instance_label = vehicle_name %}{% endif %}
-<style>
-  .ts-hh .row { display: flex; gap: 18px; flex: 1; min-height: 0; align-items: stretch; }
-  .ts-hh .left { width: 38%; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
-  .ts-hh .soc { font-size: 64px; line-height: 0.9; font-weight: 600; letter-spacing: -0.03em; }
-  .ts-hh .track { height: 12px; border: 2px solid #000; }
-  .ts-hh .fill { height: 100%; background: #000; }
-  .ts-hh .limit { font-size: 13px; font-weight: 600; }
-  .ts-hh .right { flex: 1; display: grid; grid-template-columns: 1fr 1fr; border-left: 2px solid #000; }
-  .ts-hh .cell { padding: 8px 12px; min-width: 0; border-bottom: 1px solid #000; }
-  .ts-hh .cell:nth-child(even) { border-left: 1px solid #000; }
-  .ts-hh .cell:nth-last-child(-n+2) { border-bottom: 0; }
-  .ts-hh .cell .value { display: block; font-size: 24px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ts-hh .cell .label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
-</style>
-<div class="view view--half_horizontal ts-hh">
-  <div class="layout layout--col gap--small" style="flex:1;min-height:0;">
-    <div class="row">
-      <div class="left">
-        <div><span class="soc value--tnums">{{ battery_level }}</span><span style="font-size:28px;font-weight:600;">%</span></div>
-        <div class="track"><div class="fill" style="width: {{ battery_level }}%;"></div></div>
-        <div class="limit">Limite {{ charge_limit }}%</div>
-      </div>
-      <div class="right">
-        <div class="cell"><span class="value" data-clamp="1">{{ charging_state }}</span><span class="label">Statut</span></div>
-        <div class="cell"><span class="value value--tnums">{{ range_value }} {{ range_unit }}</span><span class="label">Autonomie</span></div>
-        <div class="cell"><span class="value value--tnums">{{ power_display }}</span><span class="label">Puissance</span></div>
-        <div class="cell"><span class="value value--tnums">{{ time_display }}</span><span class="label">Fin de charge</span></div>
+{% assign charge_limit_label = "Limite " | append: charge_limit | append: "%" %}
+{% assign is_fresh = data_fresh %}
+{% if is_fresh == true or is_fresh == "true" %}
+  {% assign freshness_label = "Données live" %}
+{% else %}
+  {% assign freshness_label = "Données en cache" %}
+  {% if updated_at != "" %}{% assign freshness_label = freshness_label | append: " · " | append: updated_at %}{% endif %}
+{% endif %}
+
+<div class="layout layout--row gap--medium">
+  <div class="flex flex--col flex--center gap--small w--[38cqw]">
+    <div class="flex flex--row flex--cross-end gap--xsmall">
+      <span class="value value--xlarge value--tnums">{{ battery_level }}</span>
+      <span class="label text--gray-40">%</span>
+    </div>
+    <div class="progress-bar progress-bar--small w--full">
+      <div class="track">
+        <div class="fill" style="width: {{ battery_level }}%"></div>
       </div>
     </div>
+    <span class="label label--xsmall">{{ charge_limit_label }}</span>
   </div>
-  <div class="title_bar">
-    <svg class="image" viewBox="0 0 32 32" role="img" aria-label="TeslaSphere" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="currentColor"/></svg>
-    <span class="title">TeslaSphere</span>
-    <span class="instance">{{ instance_label }}</span>
+  <div class="grid grid--cols-2 gap--none border--l flex--grow">
+    <div class="item gap--xsmall border--b border--r">
+      <span class="value value--small" data-clamp="1">{{ charging_state }}</span>
+      <span class="label label--xsmall">Statut</span>
+    </div>
+    <div class="item gap--xsmall border--b">
+      <span class="value value--small value--tnums" data-clamp="1">{{ range_value }} {{ range_unit }}</span>
+      <span class="label label--xsmall">Autonomie</span>
+    </div>
+    <div class="item gap--xsmall border--r">
+      <span class="value value--small value--tnums" data-clamp="1">{{ power_display }}</span>
+      <span class="label label--xsmall">Puissance</span>
+    </div>
+    <div class="item gap--xsmall">
+      <span class="value value--small value--tnums" data-clamp="1">{{ time_display }}</span>
+      <span class="label label--xsmall">Fin de charge</span>
+    </div>
   </div>
+</div>
+<div class="title_bar">
+  <span class="title">TeslaSphere</span>
+  <span class="instance">{{ instance_label }}</span>
 </div>

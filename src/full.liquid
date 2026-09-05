@@ -1,4 +1,4 @@
-{% comment %}TeslaSphere full — editorial e-ink dashboard (no Highcharts){% endcomment %}
+{% comment %}TeslaSphere — framework-first, Chef-clean{% endcomment %}
 {% assign battery_level = battery_level | default: usable_battery_level | default: 0 | plus: 0 %}
 {% if battery_level > 100 %}{% assign battery_level = 100 %}{% endif %}
 {% if battery_level < 0 %}{% assign battery_level = 0 %}{% endif %}
@@ -49,55 +49,58 @@
   {% assign freshness_label = "Données en cache" %}
   {% if updated_at != "" %}{% assign freshness_label = freshness_label | append: " · " | append: updated_at %}{% endif %}
 {% endif %}
-<style>
-  .ts-full .hero { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
-  .ts-full .hero-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
-  .ts-full .soc { font-size: 96px; line-height: 0.9; font-weight: 600; letter-spacing: -0.04em; }
-  .ts-full .soc-meta { text-align: right; padding-bottom: 8px; }
-  .ts-full .soc-meta .label { display: block; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
-  .ts-full .soc-meta .status { display: block; font-size: 22px; font-weight: 500; text-transform: capitalize; margin-top: 4px; max-width: 220px; }
-  .ts-full .track { position: relative; height: 18px; border: 2px solid #000; background: #fff; }
-  .ts-full .fill { height: 100%; background: #000; }
-  .ts-full .limit-mark { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #000; }
-  .ts-full .limit-caption { margin-top: 6px; font-size: 14px; font-weight: 600; }
-  .ts-full .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 2px solid #000; margin-top: 8px; }
-  .ts-full .metric { padding: 14px 12px 6px; border-right: 1px solid #000; min-width: 0; }
-  .ts-full .metric:nth-child(3n) { border-right: 0; }
-  .ts-full .metric:nth-child(n+4) { border-top: 1px solid #000; }
-  .ts-full .metric .value { display: block; font-size: 28px; line-height: 1.05; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ts-full .metric .label { display: block; font-size: 13px; font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-</style>
-<div class="view view--full ts-full">
-  <div class="layout layout--col gap--medium hero">
-    <div class="hero-top">
-      <div>
-        <span class="soc value--tnums">{{ battery_level }}</span><span class="soc" style="font-size:48px;">%</span>
-      </div>
-      <div class="soc-meta">
-        <span class="label">Batterie</span>
-        <span class="status" data-clamp="1">{{ charging_state }}{% if vehicle_state != "" %} · {{ vehicle_state }}{% endif %}</span>
-        <span class="label" style="margin-top:8px; opacity:0.85;">{{ freshness_label }}</span>
-      </div>
+
+<div class="layout layout--col gap--large">
+  <div class="flex flex--row flex--between flex--cross-end gap--medium">
+    <div class="flex flex--row flex--cross-end gap--small">
+      <span class="value value--xxlarge value--tnums lg:value--xxxlarge">{{ battery_level }}</span>
+      <span class="label label--large text--gray-40">%</span>
     </div>
-    <div>
-      <div class="track" aria-label="Niveau de batterie">
-        <div class="fill" style="width: {{ battery_level }}%;"></div>
-        <div class="limit-mark" style="left: {{ charge_limit }}%;" title="{{ charge_limit_label }}"></div>
-      </div>
-      <div class="limit-caption">{{ charge_limit_label }}</div>
-    </div>
-    <div class="metrics">
-      <div class="metric"><span class="value value--tnums">{{ range_value }} {{ range_unit }}</span><span class="label">Autonomie</span></div>
-      <div class="metric"><span class="value value--tnums">{{ power_display }}</span><span class="label">Puissance</span></div>
-      <div class="metric"><span class="value value--tnums">{{ time_display }}</span><span class="label">Fin de charge</span></div>
-      <div class="metric"><span class="value value--tnums">{{ energy_display }}</span><span class="label">Énergie ajoutée</span></div>
-      <div class="metric"><span class="value value--tnums">{{ odo_display }}</span><span class="label">Odomètre</span></div>
-      <div class="metric"><span class="value value--tnums">{{ charge_limit }}%</span><span class="label">Objectif SOC</span></div>
+    <div class="flex flex--col flex--end gap--xsmall text--right">
+      <span class="label label--small">Batterie</span>
+      <span class="value value--small" data-clamp="1">{{ charging_state }}{% if vehicle_state != "" %} · {{ vehicle_state }}{% endif %}</span>
+      <span class="label label--xsmall text--gray-40">{{ freshness_label }}</span>
     </div>
   </div>
-  <div class="title_bar">
-    <svg class="image" viewBox="0 0 32 32" role="img" aria-label="TeslaSphere" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="currentColor"/><path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="currentColor" stroke-width="2"/></svg>
-    <span class="title">TeslaSphere</span>
-    <span class="instance">{{ instance_label }}</span>
+
+  <div class="progress-bar progress-bar--large">
+    <div class="content">
+      <span class="label">{{ charge_limit_label }}</span>
+      <span class="value value--xxsmall value--tnums">{{ battery_level }}%</span>
+    </div>
+    <div class="track">
+      <div class="fill" style="width: {{ battery_level }}%"></div>
+    </div>
   </div>
+
+  <div class="grid grid--cols-3 gap--none border--t">
+    <div class="item gap--xsmall border--r">
+      <span class="value value--tnums" data-clamp="1">{{ range_value }} {{ range_unit }}</span>
+      <span class="label label--xsmall">Autonomie</span>
+    </div>
+    <div class="item gap--xsmall border--r">
+      <span class="value value--tnums" data-clamp="1">{{ power_display }}</span>
+      <span class="label label--xsmall">Puissance</span>
+    </div>
+    <div class="item gap--xsmall">
+      <span class="value value--tnums" data-clamp="1">{{ time_display }}</span>
+      <span class="label label--xsmall">Fin de charge</span>
+    </div>
+    <div class="item gap--xsmall border--t border--r">
+      <span class="value value--tnums" data-clamp="1">{{ energy_display }}</span>
+      <span class="label label--xsmall">Énergie ajoutée</span>
+    </div>
+    <div class="item gap--xsmall border--t border--r">
+      <span class="value value--tnums" data-clamp="1">{{ odo_display }}</span>
+      <span class="label label--xsmall">Odomètre</span>
+    </div>
+    <div class="item gap--xsmall border--t">
+      <span class="value value--tnums" data-clamp="1">{{ charge_limit }}%</span>
+      <span class="label label--xsmall">Objectif SOC</span>
+    </div>
+  </div>
+</div>
+<div class="title_bar">
+  <span class="title">TeslaSphere</span>
+  <span class="instance">{{ instance_label }}</span>
 </div>
