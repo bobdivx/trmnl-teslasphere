@@ -2,7 +2,7 @@
 name: TeslaSphere
 description: "Tesla via TeslaSphere"
 strategy: polling
-polling_url: https://www.teslasphere.app/api/trmnl/vehicle{% if vin %}?vin={{ vin }}{% endif %}
+polling_url: https://teslasphere.app/api/trmnl/vehicle{% if vin %}?vin={{ vin }}{% endif %}
 polling_headers: authorization=Bearer {{ oauth_access_token }}
 polling_verb: get
 refresh_interval: 15
@@ -12,8 +12,8 @@ dark_mode: 'no'
 static_data: ''
 polling_body: ''
 oauth_enabled: 'true'
-oauth_authorize_url: https://www.teslasphere.app/api/trmnl/oauth/authorize
-oauth_token_url: https://www.teslasphere.app/api/trmnl/oauth/token
+oauth_authorize_url: https://teslasphere.app/api/trmnl/oauth/authorize
+oauth_token_url: https://teslasphere.app/api/trmnl/oauth/token
 oauth_scopes: vehicle:read
 oauth_pkce_enabled: 'true'
 custom_fields:
